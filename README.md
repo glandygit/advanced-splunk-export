@@ -2,6 +2,8 @@
 
 Console FastAPI authentifiée pour préparer, lancer et superviser des exports parallèles Splunk Cloud via [`tmuth/splunk-export`](https://github.com/tmuth/splunk-export).
 
+![Vue d'ensemble de la console](docs/screenshots/dashboard.png)
+
 ## Fonctionnalités
 
 - Jobs d'export configurables, avec jetons Splunk masqués dans l'interface
@@ -11,6 +13,18 @@ Console FastAPI authentifiée pour préparer, lancer et superviser des exports p
 - Sélecteur graphique des volumes/dossiers de stockage
 - Nettoyage de l'historique d'un job sans supprimer ses exports
 - Récupération des runs orphelins après le redémarrage de la console
+
+## Aperçu de l'interface
+
+Les captures ci-dessous sont des exemples anonymisés : elles ne contiennent ni token Splunk, ni nom d'hôte client, ni fichier réel.
+
+### Vue d'ensemble
+
+![Tableau de bord : capacité, ressources et jobs configurés](docs/screenshots/dashboard.png)
+
+### Résultats d'export
+
+![Résumé d'un job, sélection et téléchargement de fichiers](docs/screenshots/results.png)
 
 ## Installation manuelle sur Linux
 
