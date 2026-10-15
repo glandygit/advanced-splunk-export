@@ -1,12 +1,12 @@
 --- a/splunk_export_parallel.py
 +++ b/splunk_export_parallel.py
-@@ -1194,8 +1194,15 @@
+@@ -1193,6 +1193,12 @@
  
      # jobs = p_map(dispatch_searches,args=((partition_file,options,lock,global_vars)))
  
 -    for j in jobs:
 +    # Start workers progressively so their Splunk searches do not all enter
-+    # the search/stream cycle at exactly the same time.  This smooths network
++    # the search/stream cycle at exactly the same time. This smooths network
 +    # and API usage while retaining the configured parallelism.
 +    for worker_number, j in enumerate(jobs, start=1):
          j.start()
@@ -14,5 +14,3 @@
 +            logger.info('Waiting 20 seconds before starting worker %s of %s', worker_number + 1, len(jobs))
 +            sleep(20)
  
- 	# Ensure all of the processes have finished
-     for j in jobs:
