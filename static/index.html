@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Splunk Cloud Export Console</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="login-screen" id="loginScreen">
+      <form class="login-panel" id="loginForm">
+        <div class="brand login-brand">
+          <div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 17c0-4 3-7 7-7 2 0 4 1 5 3 2-4 6-6 10-6 7 0 12 5 12 12 0 .5 0 1-.1 1.5 3.6.8 6.1 3.8 6.1 7.5 0 4.4-3.6 8-8 8H13c-5 0-9-4-9-9 0-4.2 2.9-7.7 6.9-8.7"/><path class="flow" d="M13 25h15m-5-5 5 5-5 5m-8 0h18m-5-5 5 5-5 5"/></svg></div>
+          <div>
+            <strong>Splunk Cloud</strong>
+            <span>Data export console</span>
+          </div>
+        </div>
+        <label>Utilisateur<input id="loginUser" autocomplete="username" value="admin" /></label>
+        <label>Mot de passe<input id="loginPassword" type="password" autocomplete="current-password" autofocus /></label>
+        <button type="submit">Se connecter</button>
+        <small id="loginError"></small>
+      </form>
+    </div>
+
+    <div class="app">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 17c0-4 3-7 7-7 2 0 4 1 5 3 2-4 6-6 10-6 7 0 12 5 12 12 0 .5 0 1-.1 1.5 3.6.8 6.1 3.8 6.1 7.5 0 4.4-3.6 8-8 8H13c-5 0-9-4-9-9 0-4.2 2.9-7.7 6.9-8.7"/><path class="flow" d="M13 25h15m-5-5 5 5-5 5m-8 0h18m-5-5 5 5-5 5"/></svg></div>
+          <div>
+            <strong>Splunk Cloud</strong>
+            <span>Data export console</span>
+          </div>
+        </div>
+        <nav>
+          <button class="active" data-view="dashboard"><i>◈</i> Vue d'ensemble</button>
+          <button data-view="jobs"><i>⌁</i> Configurer un export</button>
+          <button data-view="logs"><i>◌</i> Supervision runner</button>
+          <button data-view="results"><i>▣</i> Résultats d’export</button>
+        </nav>
+        <div class="archive">
+          <span>Archive target</span>
+          <strong id="archivePath">/data/archive</strong>
+          <small id="archiveFree">checking...</small>
+        </div>
+      </aside>
+
+      <main>
+        <header>
+          <div>
+            <p>DATA RETRIEVE WORKSPACE</p>
+            <h1>Splunk Cloud <em>export runner</em></h1>
+            <span class="subtitle">Extraction fiable, observable et sans troncature.</span>
+          </div>
+          <div class="status-pill" id="globalStatus">Ready</div>
+        </header>
+
+        <section class="view" id="dashboard">
+          <div class="metrics">
+            <article class="metric-card volume">
+              <span>Volume exporté</span>
+              <strong id="metricVolume">0 B</strong>
+            </article>
+            <article class="metric-card storage">
+              <span>Espace libre</span>
+              <strong id="metricFree">0 B</strong>
+            </article>
+            <article class="metric-card cpu">
+              <span>CPU LXC</span>
+              <strong id="metricCpu">0%</strong>
+            </article>
+            <article class="metric-card memory">
+              <span>RAM LXC</span>
+              <strong id="metricRam">0%</strong>
+            </article>
+          </div>
+
+          <div class="panel">
+            <div class="panel-title">
+              <h2>Jobs configurés</h2>
+              <button id="newJobBtn">Nouveau job</button>
+            </div>
+            <div class="job-list" id="jobList"></div>
+          </div>
+        </section>
+
+        <section class="view hidden" id="jobs">
+          <form class="editor" id="jobForm">
+            <input type="hidden" id="jobId" />
+            <div class="wizard">
+              <div class="step active">
+                <strong>1</strong>
+                <span>Index et periode</span>
+              </div>
+              <div class="step">
+                <strong>2</strong>
+                <span>Analyse Splunk</span>
+              </div>
+              <div class="step">
+                <strong>3</strong>
+                <span>Export</span>
+              </div>
+            </div>
+            <div class="grid two">
+              <label>Nom du job<input id="name" required value="cloud-archive-main" /></label>
+              <label>Destination stockage
+                <div class="path-field"><input id="archive_path" required value="/data/archive" /><button type="button" class="browse-btn" id="browseStorageBtn">Parcourir</button></div>
+              </label>
+              <label>Splunk Cloud host<input id="splunk_host" required placeholder="prd-p-xxxx.splunkcloud.com" /></label>
+              <label>Port management<input id="splunk_port" type="number" value="8089" /></label>
+              <label class="wide">Token Splunk<input id="auth_token" type="password" required autocomplete="off" /></label>
+              <label>Index a rapatrier<input id="indexes" required placeholder="ba_test" /></label>
+              <label>Sourcetypes<input id="sourcetypes" placeholder="vide = tous" /></label>
+              <label>Début<input id="begin_date" required placeholder="2026-01-01T00:00:00" /></label>
+              <label>Fin<input id="end_date" placeholder="vide = maintenant" /></label>
+              <div class="analysis-panel wide" id="analysisPanel">
+                <div>
+                  <span>Analyse pre-export</span>
+                  <strong id="analysisTitle">Aucune analyse lancee</strong>
+                  <small id="analysisText">Lance l'analyse apres avoir renseigne l'index et la periode. Les champs techniques seront ajustes automatiquement.</small>
+                </div>
+                <button type="button" id="analyzeBtn">Analyser et optimiser</button>
+              </div>
+              <label>Unité partition
+                <select id="partition_units">
+                  <option value="minutes">minutes</option>
+                  <option value="hours" selected>hours</option>
+                  <option value="days">days</option>
+                </select>
+              </label>
+              <label>Intervalle<input id="partition_interval" type="number" min="1" value="1" /></label>
+              <label>Workers / threads<input id="parallel_processes" type="number" min="1" max="64" value="4" /></label>
+              <label>Format
+                <select id="output_format">
+                  <option value="json">json</option>
+                  <option value="csv">csv</option>
+                  <option value="raw">raw</option>
+                </select>
+              </label>
+              <label>Resume
+                <select id="resume_mode">
+                  <option value="resume" selected>resume</option>
+                  <option value="overwrite">overwrite</option>
+                </select>
+              </label>
+              <label>Max file MB<input id="max_file_size_mb" type="number" min="0" value="1000" /></label>
+              <label class="check"><input id="gzip" type="checkbox" checked /> gzip</label>
+              <label class="wide">Search extra<textarea id="extra">| table _time _raw index source sourcetype</textarea></label>
+            </div>
+            <div class="actions">
+              <button type="submit">Enregistrer</button>
+              <button type="button" id="startBtn">Lancer</button>
+              <button type="button" class="danger" id="stopBtn">Stopper</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="view hidden" id="logs">
+          <div class="panel runner">
+            <div class="panel-title">
+              <h2>Supervision runner</h2>
+              <select id="jobSelect"></select>
+            </div>
+            <div class="metrics compact">
+              <article><span>Etat</span><strong id="runStatus">-</strong></article>
+              <article><span>Traitement</span><strong id="runRate">0 part./s</strong></article>
+              <article><span>Débit données</span><strong id="runDataRate">0 B/s</strong></article>
+              <article><span>Durée</span><strong id="runDuration">0s</strong></article>
+              <article><span>Workers</span><strong id="runWorkers">0</strong></article>
+              <article><span>PID</span><strong id="runPid">-</strong></article>
+              <article><span>Progression</span><strong id="runFiles">0 / 0</strong></article>
+              <article><span>Réseau ↓</span><strong id="runNetworkDown">0 B/s</strong></article>
+              <article><span>Réseau ↑</span><strong id="runNetworkUp">0 B/s</strong></article>
+            </div>
+            <pre id="logTail"></pre>
+          </div>
+        </section>
+
+        <section class="view hidden" id="results">
+          <div class="panel results-panel">
+            <div class="panel-title">
+              <div><span class="eyebrow">EXPORT TERMINÉ</span><h2>Résumé et fichiers</h2></div>
+              <label class="result-job-picker">Job affiché<select id="resultJobSelect"></select></label>
+            </div>
+            <div class="metrics results-metrics">
+              <article><span>Durée</span><strong id="resultDuration">—</strong></article>
+              <article><span>Débit moyen</span><strong id="resultRate">—</strong></article>
+              <article><span>Événements</span><strong id="resultEvents">—</strong></article>
+              <article><span>Fichiers</span><strong id="resultFileCount">—</strong></article>
+              <article><span>Volume</span><strong id="resultVolume">—</strong></article>
+            </div>
+            <div class="results-toolbar">
+              <span id="resultStatus">Choisis un job pour afficher ses fichiers.</span>
+              <div><button type="button" class="secondary" id="selectAllFilesBtn">Sélectionner tout</button><button type="button" class="secondary" id="clearFilesBtn">Tout désélectionner</button><button type="button" class="secondary" id="downloadSelectedBtn">Télécharger sélection</button><button type="button" class="danger" id="deleteSelectedBtn">Supprimer sélection</button></div>
+            </div>
+            <div class="file-list" id="resultFiles"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+    <div class="storage-modal hidden" id="storageModal" role="dialog" aria-modal="true" aria-labelledby="storageModalTitle">
+      <div class="storage-dialog">
+        <div class="panel-title"><div><span class="eyebrow">DESTINATION STOCKAGE</span><h2 id="storageModalTitle">Choisir un volume</h2></div><button type="button" class="close-modal" id="closeStorageBtn">×</button></div>
+        <div class="storage-volumes" id="storageVolumes"></div>
+        <div class="storage-breadcrumb" id="storagePath">/</div>
+        <div class="storage-folders" id="storageFolders"></div>
+        <div class="storage-actions"><button type="button" class="secondary" id="newFolderBtn">Nouveau dossier</button><button type="button" id="useStorageBtn">Utiliser ce dossier</button></div>
+      </div>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,16 @@
+[Unit]
+Description=Splunk Cloud Export Console
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=splunkexport
+Group=splunkexport
+WorkingDirectory=/opt/splunk-cloud-export/app
+EnvironmentFile=/etc/splunk-cloud-export/app.env
+ExecStart=/opt/splunk-cloud-export/venv/bin/uvicorn app:app --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
