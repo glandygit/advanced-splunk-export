@@ -9,6 +9,9 @@ Group=splunkexport
 WorkingDirectory=/opt/splunk-cloud-export/app
 EnvironmentFile=/etc/splunk-cloud-export/app.env
 ExecStart=/opt/splunk-cloud-export/venv/bin/uvicorn app:app --host 0.0.0.0 --port 8082
+# Export workers run in their own process session.  Do not terminate them when
+# the web console is restarted for a code or configuration deployment.
+KillMode=process
 Restart=always
 RestartSec=3
 
