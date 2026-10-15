@@ -159,7 +159,11 @@
           <div class="panel runner">
             <div class="panel-title">
               <h2>Supervision runner</h2>
-              <select id="jobSelect"></select>
+              <div class="runner-controls">
+                <select id="jobSelect"></select>
+                <button type="button" class="danger hidden" id="runnerStopBtn">Stopper le job</button>
+                <button type="button" class="secondary" id="clearHistoryBtn">Effacer l'historique</button>
+              </div>
             </div>
             <div class="metrics compact">
               <article><span>Etat</span><strong id="runStatus">-</strong></article>

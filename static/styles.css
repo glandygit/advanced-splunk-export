@@ -108,12 +108,15 @@ article strong { font-size: 24px; letter-spacing: -.03em; overflow-wrap: anywher
 .metric-card.memory::before { background: #ffbd65; }
 .panel, .editor { padding: 18px; }
 .panel-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.runner-controls { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+.runner-controls select { min-width: 180px; }
 button {
   border: 0; border-radius: 9px; background: linear-gradient(135deg, var(--teal), var(--cloud)); color: #062024;
   padding: 10px 14px; font-weight: 700; cursor: pointer;
 }
 button:hover { filter: brightness(.95); }
 button.danger { background: var(--danger); color: white; }
+button:disabled { cursor: not-allowed; opacity: .55; filter: grayscale(.35); }
 .job-list { display: grid; gap: 10px; }
 .job-card {
   border: 1px solid var(--line);

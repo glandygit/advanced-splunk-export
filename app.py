@@ -717,6 +717,68 @@ def stop_job(job_id: int) -> dict[str, Any]:
     return {"job_id": job_id, "status": "interrupted"}
 
 
+def remove_run_artifact(raw_path: str, base_dir: Path) -> bool:
+    """Delete only a regular run artifact located under the expected app directory."""
+    try:
+        path = Path(raw_path).resolve()
+        root = base_dir.resolve()
+    except OSError:
+        return False
+    if root not in path.parents or not path.is_file():
+        return False
+    try:
+        path.unlink()
+        return True
+    except OSError:
+        return False
+
+
+@app.delete("/api/jobs/{job_id}/history", dependencies=[Depends(require_auth)])
+def clear_job_history(job_id: int) -> dict[str, Any]:
+    """Clear run metadata and runner artifacts while deliberately preserving exports."""
+    with runtime_lock:
+        if job_id in runtime:
+            raise HTTPException(409, "Arrête le job en cours avant d'effacer son historique")
+
+    with db() as con:
+        job = con.execute("select id from jobs where id=?", (job_id,)).fetchone()
+        if not job:
+            raise HTTPException(404, "Job not found")
+        active_run = con.execute(
+            "select pid from runs where job_id=? and status='running' order by id desc limit 1",
+            (job_id,),
+        ).fetchone()
+        if active_run and active_run["pid"] and psutil.pid_exists(active_run["pid"]):
+            raise HTTPException(409, "Arrête le job en cours avant d'effacer son historique")
+        runs = con.execute(
+            "select log_path, config_path from runs where job_id=?", (job_id,)
+        ).fetchall()
+        con.execute("delete from runs where job_id=?", (job_id,))
+        con.execute(
+            """
+            update jobs
+            set status='idle', updated_at=?, last_started_at=null,
+                last_finished_at=null, last_exit_code=null
+            where id=?
+            """,
+            (now_iso(), job_id),
+        )
+        con.commit()
+
+    deleted_artifacts = 0
+    for run in runs:
+        deleted_artifacts += int(remove_run_artifact(run["log_path"], RUN_DIR))
+        deleted_artifacts += int(remove_run_artifact(run["config_path"], CONFIG_DIR))
+    with metric_samples_lock:
+        metric_samples.clear()
+    return {
+        "job_id": job_id,
+        "cleared_runs": len(runs),
+        "deleted_artifacts": deleted_artifacts,
+        "exports_preserved": True,
+    }
+
+
 @app.get("/api/jobs/{job_id}/metrics", dependencies=[Depends(require_auth)])
 def job_metrics(job_id: int) -> dict[str, Any]:
     with db() as con:

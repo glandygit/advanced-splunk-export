@@ -161,6 +161,12 @@ async function refreshMetrics() {
   $("runNetworkUp").textContent = `${bytes(data.network?.tx_bytes_per_second)}/s`;
   $("logTail").textContent = data.log_tail || "Pas encore de logs pour ce job.";
   $("globalStatus").textContent = data.alive ? "Runner actif" : "Ready";
+  $("runnerStopBtn").classList.toggle("hidden", !data.alive);
+  $("runnerStopBtn").disabled = !data.alive;
+  $("clearHistoryBtn").disabled = data.alive;
+  $("clearHistoryBtn").title = data.alive
+    ? "Arrête le job avant d'effacer son historique."
+    : "Supprime les anciens runs, journaux et configurations. Les fichiers exportés sont conservés.";
 }
 
 function selectedResultFiles() {
@@ -240,6 +246,32 @@ $("startBtn").addEventListener("click", async () => {
 $("stopBtn").addEventListener("click", async () => {
   const id = $("jobId").value || $("jobSelect").value;
   if (id) await api(`/api/jobs/${id}/stop`, { method: "POST" });
+});
+$("runnerStopBtn").addEventListener("click", async () => {
+  const id = $("jobSelect").value;
+  if (!id || !window.confirm("Arrêter le job en cours ? Les fichiers déjà exportés seront conservés.")) return;
+  try {
+    await api(`/api/jobs/${id}/stop`, { method: "POST" });
+    await refreshJobs();
+    await refreshMetrics();
+  } catch (err) {
+    alert(err.message);
+  }
+});
+$("clearHistoryBtn").addEventListener("click", async () => {
+  const id = $("jobSelect").value;
+  if (!id) return;
+  const job = jobs.find((item) => String(item.id) === String(id));
+  if (!window.confirm(`Effacer l'historique de « ${job?.name || "ce job"} » ?\n\nLes anciens runs, journaux et fichiers de configuration seront supprimés. Les fichiers exportés seront conservés.`)) return;
+  try {
+    const result = await api(`/api/jobs/${id}/history`, { method: "DELETE" });
+    await refreshJobs();
+    await refreshMetrics();
+    await refreshResults();
+    alert(`${result.cleared_runs} exécution(s) et ${result.deleted_artifacts} artefact(s) effacés. Les fichiers exportés sont conservés.`);
+  } catch (err) {
+    alert(err.message);
+  }
 });
 $("jobSelect").addEventListener("change", refreshMetrics);
 $("resultJobSelect").addEventListener("change", refreshResults);
