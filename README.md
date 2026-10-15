@@ -28,6 +28,10 @@ Les captures ci-dessous sont des exemples anonymisés : elles ne contiennent ni 
 
 ## Installation manuelle sur Linux
 
+> L'installation applique aussi un décalage progressif de **20 secondes** entre
+> le démarrage de chaque worker. Cela évite que toutes les recherches Splunk et
+> tous les téléchargements commencent simultanément.
+
 Cette procédure installe l'application sous `/opt/splunk-cloud-export` et l'expose en HTTP sur le port `8082`. Elle a été validée sur Ubuntu/Debian avec Python 3.9 ou plus récent.
 
 > Avant de commencer, prévoyez un volume de stockage séparé ou suffisamment dimensionné pour les archives. Les exports volumineux peuvent nécessiter beaucoup de disque et de mémoire.
