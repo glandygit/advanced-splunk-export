@@ -794,6 +794,7 @@ def job_metrics(job_id: int) -> dict[str, Any]:
     pid = run["pid"] if run else None
     alive = False
     process_threads = 0
+    active_workers = 0
     cpu_percent = 0.0
     memory_rss = 0
     log_tail = read_tail(run["log_path"]) if run else ""
@@ -814,6 +815,13 @@ def job_metrics(job_id: int) -> dict[str, Any]:
             proc = psutil.Process(pid)
             alive = proc.is_running()
             process_threads = proc.num_threads()
+            # splunk_export_parallel.py is the coordinator.  Its real export
+            # workers are child processes, not threads of this coordinator.
+            active_workers = sum(
+                1
+                for child in proc.children(recursive=True)
+                if child.is_running() and child.status() != psutil.STATUS_ZOMBIE
+            )
             cpu_percent = proc.cpu_percent(interval=0.0)
             memory_rss = proc.memory_info().rss
         except psutil.Error:
@@ -832,6 +840,7 @@ def job_metrics(job_id: int) -> dict[str, Any]:
         "alive": alive,
         "pid": pid,
         "configured_workers": job["parallel_processes"],
+        "active_workers": active_workers,
         "process_threads": process_threads,
         "process_cpu_percent": cpu_percent,
         "process_memory_rss": memory_rss,

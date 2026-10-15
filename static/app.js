@@ -154,7 +154,7 @@ async function refreshMetrics() {
   const dataRate = data.alive ? data.rolling_bytes_per_second : data.bytes_per_second;
   $("runDataRate").textContent = `${bytes(dataRate)}/s`;
   $("runDuration").textContent = seconds(data.elapsed_seconds);
-  $("runWorkers").textContent = `${data.configured_workers} configured / ${data.process_threads} proc`;
+  $("runWorkers").textContent = `${data.configured_workers} configurés / ${data.active_workers} actifs`;
   $("runPid").textContent = data.pid || "-";
   $("runFiles").textContent = `${number(data.partitions_completed)} / ${number(data.partitions_total)}`;
   $("runNetworkDown").textContent = `${bytes(data.network?.rx_bytes_per_second)}/s`;
