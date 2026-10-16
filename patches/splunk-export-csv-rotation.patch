@@ -1,0 +1,11 @@
+--- a/splunk_export_parallel.py
++++ b/splunk_export_parallel.py
+@@ -1026,6 +1026,9 @@
+                         logger.debug("output_file_temp,output_file: %s,%s ",output_file_temp,output_file)
+                         f = open_file(output_file_temp)
++                        # Recreate the CSV writer after rotating the output file.
++                        if output_format == 'csv':
++                            csv_writer = csv.writer(f)
+                         counter_per_file=0
+                         
+         
